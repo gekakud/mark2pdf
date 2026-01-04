@@ -1,11 +1,17 @@
 # mark2pdf
 
+[![CI](https://github.com/gekakud/mark2pdf/actions/workflows/ci.yml/badge.svg)](https://github.com/gekakud/mark2pdf/actions/workflows/ci.yml)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A Python library for converting Markdown files to PDF with cross-platform support.
 
 ## Features
 
 - **Cross-platform**: Automatically selects the best PDF rendering backend for your OS
 - **Simple API**: One function to convert Markdown to PDF
+- **Extensible**: Support for tables, fenced code blocks, syntax highlighting, and table of contents
+- **Customizable**: Use your own CSS for styling
 
 ## Installation
 

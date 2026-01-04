@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+          pip install -e .[linux]
+
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+          pip install -e .[windows]
+
+      - name: Install Playwright browsers (Windows)
+        if: runner.os == 'Windows'
+        run: playwright install chromium
+
+      - name: Build package
+        run: python -m build
+
+      - name: Test import
+        run: python -c "from mark2pdf import mark_convert; print('Import successful')"
+
+      - name: Run conversion test (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          echo "# Test Document" > test_doc.md
+          echo "This is a test." >> test_doc.md
+          python -c "from mark2pdf import mark_convert; mark_convert('test_output.pdf', md_file_path='test_doc.md')"
+          test -f test_output.pdf && echo "PDF generated successfully"
+
+      - name: Run conversion test (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          echo "# Test Document" > test_doc.md
+          echo "This is a test." >> test_doc.md
+          python -c "from mark2pdf import mark_convert; mark_convert('test_output.pdf', md_file_path='test_doc.md')"
+          if (Test-Path test_output.pdf) { Write-Host "PDF generated successfully" }
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: dist/
